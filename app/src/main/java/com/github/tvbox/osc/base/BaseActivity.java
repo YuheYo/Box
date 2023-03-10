@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
@@ -35,6 +36,7 @@ import java.io.InputStreamReader;
 
 import me.jessyan.autosize.AutoSizeCompat;
 import me.jessyan.autosize.internal.CustomAdapt;
+import xyz.doikki.videoplayer.util.CutoutUtil;
 
 /**
  * @author pj567
@@ -70,11 +72,31 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
         } catch (Throwable th) {
             th.printStackTrace();
         }
+
+        // takagen99 : Set Theme Color
+        if (Hawk.get(HawkConfig.THEME_SELECT, 0) == 0) {
+            setTheme(R.style.NetfxTheme);
+        } else if (Hawk.get(HawkConfig.THEME_SELECT, 0) == 1) {
+            setTheme(R.style.DoraeTheme);
+        } else if (Hawk.get(HawkConfig.THEME_SELECT, 0) == 2) {
+            setTheme(R.style.PepsiTheme);
+        } else if (Hawk.get(HawkConfig.THEME_SELECT, 0) == 3) {
+            setTheme(R.style.NarutoTheme);
+        } else if (Hawk.get(HawkConfig.THEME_SELECT, 0) == 4) {
+            setTheme(R.style.MinionTheme);
+        } else if (Hawk.get(HawkConfig.THEME_SELECT, 0) == 5) {
+            setTheme(R.style.YagamiTheme);
+        } else {
+            setTheme(R.style.SakuraTheme);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResID());
         mContext = this;
+        CutoutUtil.adaptCutoutAboveAndroidP(mContext, true);//设置刘海
         AppManager.getInstance().addActivity(this);
         init();
+        setScreenOn();
     }
 
     @Override
@@ -249,6 +271,31 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
 
     public boolean supportsPiPMode() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+    }
+
+    public boolean supportsTouch() {
+        return getPackageManager().hasSystemFeature("android.hardware.touchscreen");
+    }
+
+    public void setScreenBrightness(float amt) {
+        WindowManager.LayoutParams lparams = getWindow().getAttributes();
+        lparams.screenBrightness = amt;
+        getWindow().setAttributes(lparams);
+    }
+
+    public void setScreenOn() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    public void setScreenOff() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    // takagen99: Added Theme Color
+    public int getThemeColor() {
+        TypedArray a = mContext.obtainStyledAttributes(R.styleable.themeColor);
+        int themeColor = a.getColor(R.styleable.themeColor_color_theme, 0);
+        return themeColor;
     }
 
     protected static BitmapDrawable globalWp = null;
